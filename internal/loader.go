@@ -310,8 +310,14 @@ func (tl TypeLoader) LoadEnums(args *ArgType) (map[string]*Enum, error) {
 	// process enums
 	enumMap := map[string]*Enum{}
 	for _, e := range enumList {
+		name := SingularizeIdentifier(e.TableName) + SingularizeIdentifier(e.EnumName)
+		if e.TableName != "" {
+			// MySQL enum column. Must match the field type set in LoadColumns.
+			name = ColumnEnumTypeName(e.TableName, e.EnumName)
+		}
+
 		enumTpl := &Enum{
-			Name:              SingularizeIdentifier(e.TableName) + SingularizeIdentifier(e.EnumName),
+			Name:              name,
 			Schema:            args.Schema,
 			Values:            []*EnumValue{},
 			Enum:              e,
@@ -598,7 +604,7 @@ func (tl TypeLoader) LoadColumns(args *ArgType, typeTpl *Type) error {
 
 		// set enum type
 		if c.IsEnum {
-			f.Type = SingularizeIdentifier(typeTpl.Table.TableName) + f.Type
+			f.Type = ColumnEnumTypeName(typeTpl.Table.TableName, c.ColumnName)
 		}
 
 		// append col to template fields

@@ -222,6 +222,14 @@ func SingularizeIdentifier(s string) string {
 	return snaker.SnakeToCamelIdentifier(s)
 }
 
+// ColumnEnumTypeName returns the type name of a MySQL enum column. MySQL
+// enums are defined per column, so the type is named after the singularized
+// table name and the column name. The column name is not singularized: it is
+// not a plural noun, and inflection rules can rewrite it (eg, "via" to "vium").
+func ColumnEnumTypeName(table, column string) string {
+	return SingularizeIdentifier(table) + snaker.SnakeToCamelIdentifier(column)
+}
+
 // TBuf is to hold the executed templates.
 type TBuf struct {
 	TemplateType TemplateType
